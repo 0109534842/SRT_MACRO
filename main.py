@@ -10,6 +10,24 @@ from modules.selenium import *
 import time
 import webbrowser
 
+# slack library
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+from datetime import datetime
+
+def send_message():
+    slack_token = "슬랙 토큰 입력" # slack 토큰 입력
+    client = WebClient(token=slack_token)
+
+    try:
+        response = client.chat_postMessage(
+            channel="채널 ID 입력", #채널 id를 입력합니다.
+            text=f"[SRT 예매 성공 알림]\n\n시간: {datetime.now().date()}"
+        )
+    except SlackApiError as e:
+        print("[Error]", e)
+        pass
+
 chrome_path = 'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s'
 
 ############# 자동 예매 원하는 설정으로 변경 ##############
@@ -18,14 +36,17 @@ member_number = "0000000000" # 회원번호
 password= "password" # 비밀번호
 arrival = "동대구" # 출발지
 departure = "수서" # 도착지
-standard_date = "20240506" # 기준날짜 ex) 20221101
-standard_time = "12" # 기준 시간 ex) 00 - 22 // 2의 배수로 입력
+standard_date = "20241224" # 기준날짜 ex) 20221101
+standard_time = "14" # 기준 시간 ex) 00 - 22 // 2의 배수로 입력
 
 """
 현재 페이지에 나타난 기차 몇번째 줄부터 몇번째 줄의 기차까지 조회할지 선택 
 """
 from_train_number = 1 # 몇번째 기차부터 조회할지  min = 1, max = 10
 to_train_number = 10 # 몇번째 기차까지 조회할지 min = from_train_number, max = 10
+
+
+use_slack = False # Slack 메시지 알림 사용 여부
 
 #################################################################
 
@@ -129,6 +150,7 @@ while True:
                             reserved = True
                             print('예약 성공')
                             webbrowser.get(chrome_path).open("https://etk.srail.kr/hpg/hra/02/selectReservationList.do?pageId=TK0102010000")
+                            if use_slack: send_message()
                             break
 
                         else:
